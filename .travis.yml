@@ -1,0 +1,17 @@
+language: python
+python:
+- '3.6'
+install: true
+env:
+  global:
+  - REPOSITORY_USER=chadell
+  - secure: a60BmDvvTk07fBOsIY/prIiqY0C57sephHWVb8Qv7vhQrryuJt8Otzta0v2jHkghzcFe5hJx4mO41VucQ9877ezHWtYarAA5tegbzjj6US5thpQypdgOXh2jcQO27mnDirfeuHm3W5cw5ENrmgvTQwdG/F7DFR0sppueI2kKky2bdA/KiBGsUGdx5oO8Qx0nC4jFWhGf1YngjncXBycIVkFqhiM22g6JaHAZXp/ryD60uufAeEVWw97JufqhygxDACwFASJsstoDpdM/u3QeBJ0q70cLg5GslOik7u9hzeph9b9+bM/RZx/KdUjW1LBYAMbcVSIHV0JFazz3VPnme4xOHkJ1/8TMSu80XDpKO7ND2TCoKp7sb6/XYa/iwTr37GZ7mVaRqjKQ8R1aueZ5I6obLQL1P2hSSZDVHISAmUzvPHWIC/ohKRNyo2/SXmxHVLnO+qgEz0AWc6Q9NiNp45mCtRisBbLtCFvyONeGebAJ5QHQRVc/kPxZHF2358U3G/6pAyopu+egA3/StuDOhItOE7fI7m0HvOQ8PG7+A/0qwcPhMdRn9OyXmhdYY5bUDJW+Tt22hjeJlkQtJhiaFUWnMYJ6WA0CCK+OOURpGbRzdc+Tdvd05TFa/GgV+Livr9BrUOW0Rak+xYtQRHk/G6kLS2QD/dhBzbR+TQdITJw=
+script:
+- "./script/cibuild"
+deploy:
+- provider: script
+  skip_cleanup: true
+  script: "./script/cideploy"
+  on:
+    python: 3.6
+    tags: true
