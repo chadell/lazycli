@@ -54,6 +54,7 @@ setup(
     tests_require=parse_requirements(os.path.join('requirements', 'test_requirements.txt')),
     cmdclass={'test': PyTest},
     test_suite='tests',
+    license='MIT',
     keywords=['Git', 'GitHub', 'automation', 'networking', 'netmiko'],
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -64,10 +65,7 @@ setup(
         "Intended Audience :: System Administrators",
         "Intended Audience :: Telecommunications Industry",
 
-        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-
-        "Operating System :: POSIX",
-        "Operating System :: Unix",
+        "License :: OSI Approved :: MIT License",
 
         "Programming Language :: Python",
         "Programming Language :: Python :: 3.6",
