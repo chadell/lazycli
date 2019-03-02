@@ -34,20 +34,10 @@ class Config:
         ]
         """
 
-        fields = command.split()
-        custom_command = []
-        args = []
-        for field in fields:
-            if ":" in field:
-                arg = field.split(":")
-                args.append((arg[0], arg[1]))
-                continue
-            custom_command.append(field)
-
-        custom_command = " ".join(custom_command)
+        custom_command, args = self._get_custom_command_and_args(command)
 
         if custom_command in self.custom_commands:
-            print(color_string("Sorry, custom command already there. You can upload it", 'red'))
+            print(color_string("Sorry, custom command {custom_command} already there.", 'red'))
             return
 
         self.custom_commands[custom_command] = {
@@ -60,11 +50,11 @@ class Config:
                                                                     " will remind you what this command is"
                                                                     " supposed to do: \n")
 
-        resp = input("\nDo you want to add a new concrete type implementation (y/N)?")
+        resp = input("\nDo you want to add a concrete vendor implementation (y/N)?")
         if resp.lower() not in ['y', 'yes']:
             print(color_string("Keep in mind that no actual implementation added", 'yellow'))
         else:
-            self._define_for_vendor_commands(custom_command)
+            self._define_vendor_commands(custom_command)
 
         self._save_to_file()
 
@@ -94,7 +84,7 @@ class Config:
             print("- Using ' | ' you can match specific words")
         print("- List of your custom commands:")
         for command in self.custom_commands:
-            print(f' - {command}: {self.custom_commands[command]["description"]}')
+            print(f' * {command}: {self.custom_commands[command]["description"]}')
             print(f'   {" " * len(command)}  args: {self.custom_commands[command]["args"]}')
 
     def _save_to_file(self):
@@ -104,7 +94,7 @@ class Config:
         except Exception as error:
             raise NetcliError(error)
 
-    def _define_for_vendor_commands(self, custom_command):
+    def _define_vendor_commands(self, custom_command):
         vendor_commands = {}
         print("Time to add type implementation, hint: '<type> - <command vrf [vrf]'. Remember to end/save")
         user_input = ""
@@ -124,3 +114,17 @@ class Config:
                 except IndexError:
                     print(color_string("Your command is not following proper pattern", 'red'))
         self.custom_commands[custom_command]["types"] = vendor_commands
+
+    @staticmethod
+    def _get_custom_command_and_args(command):
+        fields = command.split()
+        custom_command = []
+        args = []
+        for field in fields:
+            if ":" in field:
+                arg = field.split(":")
+                args.append((arg[0], arg[1]))
+                continue
+            custom_command.append(field)
+
+        return " ".join(custom_command), args

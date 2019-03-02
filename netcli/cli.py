@@ -100,7 +100,7 @@ def update(ctx, command):
 )
 @click.option(
     '--vendor', '-v',
-    default="cisco_xr",
+    required=True,
 )
 @click.pass_context
 def connect(ctx, target, user, password, vendor):
@@ -134,7 +134,6 @@ def connect(ctx, target, user, password, vendor):
 
     Spinner.result('OK', 'green')
     print()
-
     print(color_string("Interactive NETCLI", 'green'))
     print()
 
@@ -156,13 +155,12 @@ def connect(ctx, target, user, password, vendor):
         cli_queue.put((True, user_input))
         time.sleep(TIMEOUT)
 
-        if user_input not in ['end', 'exit']:
+        if user_input not in ['end', 'exit', 'quit']:
             res = cli_queue.get()
             print(color_string(res[1], "green" if res[0] else "red"))
         else:
             end_loop = True
 
-    print()
     time.sleep(TIMEOUT*3)
     print(color_string("Bye, bye!", 'yellow'))
 
