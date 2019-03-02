@@ -47,6 +47,13 @@ class Spinner:
     def __exit__(self, *args):
         self.stop()
 
+    @staticmethod
+    def result(res, color):
+        sys.stdout.write('\b')
+        sys.stdout.flush()
+        sys.stdout.write(color_string(res, color))
+        print()
+
 
 def color_string(msg, color):
     colours = {

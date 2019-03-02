@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import os
 import time
-import sys
 # pylint: disable=useless-import-alias,unnecessary-pass,unused-argument,too-many-statements,no-value-for-parameter
 try:
     import queue as queue
@@ -94,16 +93,14 @@ def update(ctx, command):
 @click.option(
     '--user', '-u',
     default=os.getlogin(),
-    required=False,
 )
 @click.option(
     '--password', '-p',
     default=None,
-    required=False,
 )
 @click.option(
     '--vendor', '-v',
-    required=True,
+    default="cisco_xr",
 )
 @click.pass_context
 def connect(ctx, target, user, password, vendor):
@@ -112,36 +109,30 @@ def connect(ctx, target, user, password, vendor):
     """
     print(color_string(f"\nWelcome {user} to the laziest CLI ever!!!\n", 'green'))
 
-    with Spinner(f"Connecting to {target}"):
+    cli_queue = queue.Queue()
+    with Spinner(f"Connecting to {target} using vendor {vendor}"):
         try:
-            cli_queue = queue.Queue()
             connection_config = {
                 "target": target,
                 "user": user,
                 "password": password,
                 "device_type": vendor,
             }
-            connection_thread = ConnectThread(connection_config, ctx.obj['config'].custom_commands, cli_queue)
+            connection_thread = ConnectThread(connection_config,
+                                              ctx.obj['config'].custom_commands,
+                                              cli_queue)
             connection_thread.start()
             thread_response = cli_queue.get()
             if not thread_response[0]:
-                sys.stdout.write('\b')
-                sys.stdout.flush()
-                sys.stdout.write(color_string("KO", 'red'))
-                print()
+                Spinner.result('KO', 'red')
                 print(color_string(thread_response[1], 'red'))
                 return
-
         except NetcliError as error:
-            sys.stdout.write('\b')
-            sys.stdout.flush()
-            sys.stdout.write(color_string("KO", 'red'))
-            print()
+            Spinner.result('KO', 'red')
             print(color_string(error, 'red'))
             return
 
-    sys.stdout.write(color_string("OK", 'green'))
-    print()
+    Spinner.result('OK', 'green')
     print()
 
     print(color_string("Interactive NETCLI", 'green'))
@@ -154,19 +145,17 @@ def connect(ctx, target, user, password, vendor):
         except (EOFError, KeyboardInterrupt):
             cli_queue.put((True, "end"))
             end_loop = True
+            break
         if user_input in ['']:
             continue
         if user_input in ['help', 'h']:
-            print("CLI shortcuts:")
-            print("- Using 'r- ' you can run raw commands")
-            print("- Using ' | ' you can match specific words")
-            print("- And the brief list of your custom commands:")
-            ctx.obj['config'].show_brief()
+            ctx.obj['config'].show_brief(cli=True)
             continue
 
         print()
         cli_queue.put((True, user_input))
         time.sleep(TIMEOUT)
+
         if user_input not in ['end', 'exit']:
             res = cli_queue.get()
             print(color_string(res[1], "green" if res[0] else "red"))
