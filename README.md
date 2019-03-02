@@ -1,8 +1,8 @@
-[![Build Status](https://travis-ci.org/chadell/netcli.svg?branch=master)](https://travis-ci.org/chadell/netcli)
+[![Build Status](https://travis-ci.org/chadell/lazycli.svg?branch=master)](https://travis-ci.org/chadell/lazycli)
 
 # NETCLI
 
-netcli is the CLI for the old people who is not able to remember every command in every vendor gear.
+netcli is the CLI for the people who is not able to remember every command for every vendor gear.
 
 So, the idea it's simple, why you don't build your own language and then use it as you want?
 
@@ -19,6 +19,8 @@ pip install netcli
 ## How to run it
 
 ## Config
+
+> Your customs commands will be stored in `~/.my_netcli_commands.json`
 
 ### Add
 

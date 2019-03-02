@@ -1,3 +1,4 @@
+from os.path import expanduser, join
 import json
 import yaml
 from netmiko.ssh_dispatcher import CLASS_MAPPER_BASE
@@ -6,11 +7,11 @@ from netcli.formatters import color_string
 
 
 class Config:
-    FILE = ".my_commands.json"
+    COMMANDS_PATH = join(expanduser("~"), ".my_netcli_commands.json")
 
     def __init__(self):
         try:
-            with open(self.FILE, 'r') as f:
+            with open(self.COMMANDS_PATH, 'r') as f:
                 self.custom_commands = json.load(f)
         except (FileNotFoundError, json.decoder.JSONDecodeError):
             self.custom_commands = {}
@@ -110,7 +111,7 @@ class Config:
 
     def _save_to_file(self):
         try:
-            with open(self.FILE, 'w') as destination_file:
+            with open(self.COMMANDS_PATH, 'w') as destination_file:
                 json.dump(self.custom_commands, destination_file)
         except Exception as error:
             raise NetcliError(error)
