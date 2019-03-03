@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/chadell/lazycli.svg?branch=master)](https://travis-ci.org/chadell/lazycli)
+[![Build Status](https://travis-ci.org/chadell/netcli.svg?branch=master)](https://travis-ci.org/chadell/netcli)
 
 # NETCLI
 
