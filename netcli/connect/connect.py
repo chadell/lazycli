@@ -4,6 +4,7 @@ from os.path import expanduser, join
 from threading import Thread
 import json
 import ipaddress
+import difflib
 import netmiko
 from netcli.formatters import Spinner, color_string
 from netcli.errors import NetcliError
@@ -57,11 +58,26 @@ class ConnectThread(Thread):
         except Exception as error:
             raise NetcliError(f'ERROR: Unable to connect to device: {str(error)}')
 
+    def _recommend_command(self, command):
+        recommended_commands = difflib.get_close_matches(command, self.custom_commands.keys(), cutoff=0.3)
+        response = ""
+        for recommended_command in recommended_commands + \
+         [cmd for cmd in self.custom_commands.keys() if (command in cmd and cmd not in recommended_commands)]:
+            if response != "":
+                response += ', '
+            response += f'{recommended_command}'
+
+        return response
+
     def _get_vendor_command(self, command):
         main_command = command.split("[")[0].strip()
 
         if main_command not in self.custom_commands:
-            raise NetcliError(f"Custom command {command} not recognized. Use help")
+            recommended_commands = self._recommend_command(main_command)
+            response = f"Custom command {command} not recognized."
+            if recommended_commands:
+                response += f" Maybe you meant: {recommended_commands}"
+            raise NetcliError(response)
 
         try:
             vendor_command = self.custom_commands[main_command]["types"][self.config['type']]
