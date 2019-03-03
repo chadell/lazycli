@@ -88,8 +88,15 @@ CLI shortcuts:
         if self.custom_commands:
             print(color_string("  - List of your custom commands:", 'yellow'))
             for command in self.custom_commands:
-                print(color_string(f'  * {command}: {self.custom_commands[command]["description"]}', 'yellow'))
-                print(color_string(f'    {" " * len(command)}  {self.custom_commands[command]["args"]}', 'yellow'))
+                print(color_string(f'    * {command}: {self.custom_commands[command]["description"]}', 'yellow'))
+
+    def show_details(self, command):
+        for custom_command in self.custom_commands:
+            if command in custom_command:
+                print(color_string(f' * {custom_command}: {self.custom_commands[custom_command]["description"]}',
+                                   'yellow'))
+                print(color_string(f'   {" " * len(custom_command)}  {self.custom_commands[custom_command]["args"]}',
+                                   'yellow'))
 
     def _save_to_file(self):
         try:

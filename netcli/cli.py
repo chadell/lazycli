@@ -150,7 +150,9 @@ def connect(ctx, target, user, password, vendor):
         if user_input in ['help', 'h']:
             ctx.obj['config'].show_brief(cli=True)
             continue
-
+        if user_input[-1] == '?':
+            ctx.obj['config'].show_details(user_input[:-2])
+            continue
         print()
         cli_queue.put((True, user_input))
         time.sleep(TIMEOUT)
