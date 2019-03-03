@@ -11,6 +11,7 @@ from netcli.errors import NetcliError
 
 TIMEOUT = 0.2
 
+
 class ConnectThread(Thread):
     """
     Abstract Netmiko session to be run as separate thread
@@ -67,8 +68,8 @@ class ConnectThread(Thread):
     def _recommend_command(self, command):
         recommended_commands = difflib.get_close_matches(command, self.custom_commands.keys(), cutoff=0.3)
         response = ""
-        for recommended_command in recommended_commands + \
-         [cmd for cmd in self.custom_commands.keys() if (command in cmd and cmd not in recommended_commands)]:
+        for recommended_command in recommended_commands + [cmd for cmd in self.custom_commands.keys()
+                                                           if (command in cmd and cmd not in recommended_commands)]:
             if response != "":
                 response += ', '
             response += f'{recommended_command}'
