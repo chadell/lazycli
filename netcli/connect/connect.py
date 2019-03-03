@@ -10,7 +10,6 @@ from netcli.errors import NetcliError
 
 TIMEOUT = 0.2
 
-# pylint: disable=too-many-instance-attributes
 class ConnectThread(Thread):
     """
     Abstract Netmiko session to be run as separate thread
@@ -24,37 +23,37 @@ class ConnectThread(Thread):
                 self.connection_defaults = json.load(f)
         except (FileNotFoundError, json.decoder.JSONDecodeError):
             self.connection_defaults = {}
-        # check if the target is an IP or a fqdn to concatenate dns suffix
-        try:
-            ipaddress.ip_address(connection_config['target'])
-            self.target = connection_config['target']
-        except ValueError:
-            self.target = connection_config['target'] + self.connection_defaults.get('dns_suffix', "")
-        self.user = connection_config['user']
-        self.password = connection_config['password']
-        self.type = connection_config['device_type']
+
+        self.config = {
+            'device_type':          connection_config['device_type'],
+            'ip':                   self._get_target(connection_config['target']),
+            'username':             connection_config['user'],
+            'password':             connection_config['password'],
+            'global_delay_factor':  self.connection_defaults.get('global_delay_factor', 10),
+            'timeout':              self.connection_defaults.get('timeout', 30),
+        }
         self.custom_commands = custom_commands
         self.queue = queue
         self.connection = None
 
-    def _establish(self):
-        config = {
-            'device_type':          self.type,
-            'ip':                   self.target,
-            'username':             self.user,
-            'global_delay_factor':  self.connection_defaults.get('global_delay_factor', 10),
-            'timeout':              self.connection_defaults.get('timeout', 30),
-        }
+    def _get_target(self, target):
+        '''Return target either is an IP or a fqdn, concatenating dns suffix'''
+        try:
+            ipaddress.ip_address(target)
+            return target
+        except ValueError:
+            return target + self.connection_defaults.get('dns_suffix', "")
 
-        if self.password:
-            config['password'] = self.password
-            config['use_keys'] = False
+    def _establish(self):
+
+        if self.config['password']:
+            self.config['use_keys'] = False
         else:
-            config['use_keys'] = True
-            config['allow_agent'] = True
+            self.config['use_keys'] = True
+            self.config['allow_agent'] = True
 
         try:
-            return netmiko.ConnectHandler(**config)
+            return netmiko.ConnectHandler(**self.config)
         except Exception as error:
             raise NetcliError(f'ERROR: Unable to connect to device: {str(error)}')
 
@@ -65,9 +64,9 @@ class ConnectThread(Thread):
             raise NetcliError(f"Custom command {command} not recognized. Use help")
 
         try:
-            vendor_command = self.custom_commands[main_command]["types"][self.type]
+            vendor_command = self.custom_commands[main_command]["types"][self.config['type']]
         except KeyError:
-            raise NetcliError(f"Command {command} not implemented for vendor {self.type}")
+            raise NetcliError(f"Command {command} not implemented for vendor {self.config['type']}")
 
         return self._process_arguments(command, vendor_command)
 
@@ -151,4 +150,4 @@ class ConnectThread(Thread):
                 self.queue.put((success, response))
             time.sleep(TIMEOUT)
 
-        print(color_string(f"Disconnected from {self.target}", 'yellow'))
+        print(color_string(f"Disconnected from {self.config['ip']}", 'yellow'))
