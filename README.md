@@ -70,13 +70,20 @@ Notes:
 
 ### Default options
 
-You can use file `~/.netcli.cfg` to define some defaults to easy your operation:
+You can overwrite default behaviours by using file `~/.netcli.cfg` to define some custom values to easy your operation:
 
 ```
 {
         "dns_suffix": ".opendns.com",
-        "global_delay_factor": 6
+        "global_delay_factor": 6,
+        "max_lines": 20
 }
 ```
 
+Supported values:
+
 * **dns_suffix** is concatenated at the end of your target name
+* **max_lines** limit the maximum number of lines to be returned to the CLI (this doesn't affect the logs)
+* **log_path** full path to store the logging of the session. By default is the current directory with the timestamp (i.e. netcli_20190303-194937)
+* **timeout** Netmiko timeout
+* **global_delay_factor** Netmiko global_delay_factor

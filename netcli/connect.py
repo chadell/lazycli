@@ -17,6 +17,11 @@ class ConnectThread(Thread):
     """
 
     CONFIG_PATH = join(expanduser("~"), ".netcli.cfg")
+    LOG_PATH = f'netcli_{time.strftime("%Y%m%d-%H%M%S")}.log'
+    MAX_LINES = 1000
+    GLOBAL_DELAY_FACTOR = 10
+    TIMEOUT = 30
+
     def __init__(self, connection_config, custom_commands, queue):
         Thread.__init__(self)
         try:
@@ -30,8 +35,9 @@ class ConnectThread(Thread):
             'ip':                   self._get_target(connection_config['target']),
             'username':             connection_config['user'],
             'password':             connection_config['password'],
-            'global_delay_factor':  self.connection_defaults.get('global_delay_factor', 10),
-            'timeout':              self.connection_defaults.get('timeout', 30),
+            'global_delay_factor':  self.connection_defaults.get('global_delay_factor', self.GLOBAL_DELAY_FACTOR),
+            'timeout':              self.connection_defaults.get('timeout', self.TIMEOUT),
+            'session_log':          self.connection_defaults.get('log_path', self.LOG_PATH),
         }
         self.custom_commands = custom_commands
         self.queue = queue
@@ -80,7 +86,7 @@ class ConnectThread(Thread):
             raise NetcliError(response)
 
         try:
-            vendor_command = self.custom_commands[main_command]["types"][self.config['type']]
+            vendor_command = self.custom_commands[main_command]["types"][self.config['device_type']]
         except KeyError:
             raise NetcliError(f"Command {command} not implemented for vendor {self.config['type']}")
 
@@ -121,9 +127,13 @@ class ConnectThread(Thread):
 
         with Spinner(f"- Running vendor command: {vendor_command}"):
             try:
-                response = self.connection.send_command(vendor_command)
+                # response = self.connection.send_command(vendor_command)
+                response = self.connection.send_command_timing(vendor_command)
             except netmiko.NetMikoTimeoutException as error:
                 raise NetcliError(error)
+
+        max_lines = self.connection_defaults.get('max_lines', self.MAX_LINES)
+        response = "\n".join(response.split("\n")[:max_lines])
 
         if not raw:
             try:
@@ -166,4 +176,5 @@ class ConnectThread(Thread):
                 self.queue.put((success, response))
             time.sleep(TIMEOUT)
 
-        print(color_string(f"Disconnected from {self.config['ip']}", 'yellow'))
+        print(color_string(f"Disconnected from {self.config['ip']}. "
+                           f"All your activity has been recorded in {self.config['session_log']}", 'yellow'))
