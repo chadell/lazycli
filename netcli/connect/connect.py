@@ -1,20 +1,35 @@
 import time
 import re
+from os.path import expanduser, join
 from threading import Thread
+import json
+import ipaddress
 import netmiko
 from netcli.formatters import Spinner, color_string
 from netcli.errors import NetcliError
 
 TIMEOUT = 0.2
 
-
+# pylint: disable=too-many-instance-attributes
 class ConnectThread(Thread):
     """
     Abstract Netmiko session to be run as separate thread
     """
+
+    CONFIG_PATH = join(expanduser("~"), ".netcli.cfg")
     def __init__(self, connection_config, custom_commands, queue):
         Thread.__init__(self)
-        self.target = connection_config['target']
+        try:
+            with open(self.CONFIG_PATH, 'r') as f:
+                self.connection_defaults = json.load(f)
+        except (FileNotFoundError, json.decoder.JSONDecodeError):
+            self.connection_defaults = {}
+        # check if the target is an IP or a fqdn to concatenate dns suffix
+        try:
+            ipaddress.ip_address(connection_config['target'])
+            self.target = connection_config['target']
+        except ValueError:
+            self.target = connection_config['target'] + self.connection_defaults.get('dns_suffix', "")
         self.user = connection_config['user']
         self.password = connection_config['password']
         self.type = connection_config['device_type']
@@ -27,8 +42,8 @@ class ConnectThread(Thread):
             'device_type':          self.type,
             'ip':                   self.target,
             'username':             self.user,
-            'global_delay_factor':  10,
-            'timeout':              30,
+            'global_delay_factor':  self.connection_defaults.get('global_delay_factor', 10),
+            'timeout':              self.connection_defaults.get('timeout', 30),
         }
 
         if self.password:

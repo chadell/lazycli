@@ -67,3 +67,16 @@ Notes:
 * Execution of **raw commands** is possible starting the command with `r- ` 
 * **Matching output** of custom commands can be achieved by adding ` | ` and the string to match
 * Use `help`/`h` to get extra help
+
+### Default options
+
+You can use file `~/.netcli.cfg` to define some defaults to easy your operation:
+
+```
+{
+        "dns_suffix": ".opendns.com",
+        "global_delay_factor": 6
+}
+```
+
+* **dns_suffix** is concatenated at the end of your target name
