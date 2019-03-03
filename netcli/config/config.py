@@ -10,6 +10,12 @@ class Config:
     COMMANDS_PATH = join(expanduser("~"), ".my_netcli_commands.json")
     EXIT_WORDS = ["end", 'exit', 'save']
 
+    CLI_HELP = """
+CLI shortcuts:
+  - Using 'r- ' you can run raw commands
+  - Using ' | ' you can match specific words
+"""
+
     def __init__(self):
         try:
             with open(self.COMMANDS_PATH, 'r') as f:
@@ -44,7 +50,7 @@ class Config:
             "args": {},
         }
         for arg in args:
-            self.custom_commands[custom_command]["args"][arg[0]] = arg[1]
+            self.custom_commands[custom_command]['args'][arg[0]] = arg[1]
 
         self.custom_commands[custom_command]['description'] = input("\nPlease provide a useful description that"
                                                                     " will remind you what this command is"
@@ -57,7 +63,6 @@ class Config:
             self._define_vendor_commands(custom_command)
 
         self._save_to_file()
-
         print(color_string(f"Added command {command}", 'green'))
 
     def delete(self, command):
@@ -79,13 +84,12 @@ class Config:
 
     def show_brief(self, cli=False):
         if cli:
-            print("CLI shortcuts:")
-            print("- Using 'r- ' you can run raw commands")
-            print("- Using ' | ' you can match specific words")
-        print("- List of your custom commands:")
-        for command in self.custom_commands:
-            print(f' * {command}: {self.custom_commands[command]["description"]}')
-            print(f'   {" " * len(command)}  args: {self.custom_commands[command]["args"]}')
+            print(color_string(self.CLI_HELP, 'yellow'))
+        if self.custom_commands:
+            print(color_string("  - List of your custom commands:", 'yellow'))
+            for command in self.custom_commands:
+                print(color_string(f'  * {command}: {self.custom_commands[command]["description"]}', 'yellow'))
+                print(color_string(f'    {" " * len(command)}  {self.custom_commands[command]["args"]}', 'yellow'))
 
     def _save_to_file(self):
         try:
@@ -96,7 +100,7 @@ class Config:
 
     def _define_vendor_commands(self, custom_command):
         vendor_commands = {}
-        print("Time to add type implementation, hint: '<type> - <command vrf [vrf]'. Remember to end/save")
+        print("Time to add type implementation, hint: <type> - <command vrf [vrf]>. Remember to end/save")
         user_input = ""
         while user_input.lower() not in self.EXIT_WORDS:
             user_input = input(color_string("=> ", 'cyan'))
@@ -112,7 +116,7 @@ class Config:
                     vendor_command = user_input.split(" - ")[1]
                     vendor_commands.update({vendor_type: vendor_command})
                 except IndexError:
-                    print(color_string("Your command is not following proper pattern", 'red'))
+                    print(color_string("Your command is not following the proper pattern", 'red'))
         self.custom_commands[custom_command]["types"] = vendor_commands
 
     @staticmethod
