@@ -24,7 +24,7 @@ class Spinner:
             self.delay = delay
 
     def spinner_task(self):
-        sys.stdout.write(self.msg + " ")
+        sys.stdout.write(color_string(self.msg, 'yellow') + " ")
         while self.busy:
             sys.stdout.write(next(self.spinner_generator))
             sys.stdout.flush()
