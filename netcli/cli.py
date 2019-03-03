@@ -8,8 +8,8 @@ except ImportError:
     import Queue as queue
 import click
 
-from netcli.config.config import Config
-from netcli.connect.connect import ConnectThread
+from netcli.config import Config
+from netcli.connect import ConnectThread
 from netcli.formatters import Spinner, color_string
 from netcli.errors import NetcliError
 

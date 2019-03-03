@@ -41,8 +41,6 @@ setup(
     python_requires='>=3.5',
     author=package.__author__,
     author_email=package.__author_email__,
-    mantainer=package.__author__,
-    mantainer_email=package.__author_email__,
     description=package.__description__,
     packages=find_packages(),
     entry_points={
