@@ -2,12 +2,12 @@ import time
 import re
 from os.path import expanduser, join
 from threading import Thread
-import json
 import ipaddress
 import difflib
 import netmiko
-from netcli.formatters import Spinner, color_string
+from netcli.formatters import Spinner, color_string, load_json
 from netcli.errors import NetcliError
+from netcli.config import Config
 
 TIMEOUT = 0.2
 
@@ -23,10 +23,10 @@ class ConnectThread(Thread):
     GLOBAL_DELAY_FACTOR = 10
     TIMEOUT = 30
 
-    def __init__(self, connection_config, custom_commands, queue):
+    def __init__(self, connection_config, queue):
         Thread.__init__(self)
 
-        self.connection_defaults = self._load_custom_commands()
+        self.connection_defaults = load_json(self.CONFIG_PATH)
         self.config = {
             'device_type':          connection_config['device_type'],
             'ip':                   self._get_target(connection_config['target']),
@@ -37,17 +37,9 @@ class ConnectThread(Thread):
             'session_log':          self.connection_defaults.get('log_path', self.LOG_PATH)
                                     if connection_config['log_enabled'] else None # noqa E131
         }
-        self.custom_commands = custom_commands
+        self.custom_commands = Config().__dict__
         self.queue = queue
         self.connection = None
-
-    @classmethod
-    def _load_custom_commands(cls):
-        try:
-            with open(cls.CONFIG_PATH, 'r') as f:
-                return json.load(f)
-        except (FileNotFoundError, json.decoder.JSONDecodeError):
-            return {}
 
     def _get_target(self, target):
         '''Return target either is an IP or a fqdn, concatenating dns suffix'''
@@ -73,7 +65,7 @@ class ConnectThread(Thread):
     def _recommend_command(self, command):
         recommended_commands = difflib.get_close_matches(command, self.custom_commands.keys(), cutoff=0.3)
         response = ""
-        for recommended_command in recommended_commands + [cmd for cmd in self.custom_commands.keys()
+        for recommended_command in recommended_commands + [cmd for cmd in self.custom_commands
                                                            if (command in cmd and cmd not in recommended_commands)]:
             if response != "":
                 response += ', '
@@ -174,7 +166,7 @@ class ConnectThread(Thread):
             if requested_command.lower() in ['end', 'exit', 'quit']:
                 end_loop = True
             elif requested_command.lower() in ['edit_command']:
-                self.custom_commands = self._load_custom_commands()
+                self.custom_commands = Config().__dict__
                 self.queue.put((True, ""))
             else:
                 try:

@@ -132,7 +132,6 @@ def connect(ctx, target, user, password, vendor, logging):
                 "log_enabled": logging,
             }
             connection_thread = ConnectThread(connection_config,
-                                              ctx.obj['config'].custom_commands,
                                               cli_queue)
             connection_thread.start()
             thread_response = cli_queue.get()

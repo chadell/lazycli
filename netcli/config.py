@@ -3,12 +3,12 @@ import json
 import yaml
 from netmiko.ssh_dispatcher import CLASS_MAPPER_BASE
 from netcli.errors import NetcliError
-from netcli.formatters import color_string
+from netcli.formatters import color_string, load_json
 
 
 class Config:
-    COMMANDS_PATH = join(expanduser("~"), ".netcli_commands.json")
     EXIT_WORDS = ["end", 'exit', 'save']
+    COMMANDS_PATH = join(expanduser("~"), ".netcli_commands.json")
 
     CLI_HELP = """
 CLI shortcuts:
@@ -19,11 +19,7 @@ CLI shortcuts:
 """
 
     def __init__(self):
-        try:
-            with open(self.COMMANDS_PATH, 'r') as f:
-                self.custom_commands = json.load(f)
-        except (FileNotFoundError, json.decoder.JSONDecodeError):
-            self.custom_commands = {}
+        self.custom_commands = load_json(self.COMMANDS_PATH)
 
     def add(self, command):
         """
@@ -103,8 +99,10 @@ CLI shortcuts:
             if command in custom_command:
                 print(color_string(f' * {custom_command}: {self.custom_commands[custom_command]["description"]}',
                                    'yellow'))
-                print(color_string(f'   {" " * len(custom_command)}  {self.custom_commands[custom_command]["args"]}',
-                                   'yellow'))
+                if 'args' in self.custom_commands[custom_command]:
+                    print(color_string(f'   {" " * len(custom_command)}  '
+                                       '{self.custom_commands[custom_command]["args"]}',
+                                       'yellow'))
 
     def _save_to_file(self):
         try:

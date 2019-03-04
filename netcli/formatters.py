@@ -1,6 +1,7 @@
 import sys
 import time
 import threading
+import json
 from colorama import Fore, Style
 
 
@@ -67,3 +68,11 @@ def color_string(msg, color):
         return f"{colours[color]}{msg}{Style.RESET_ALL}"
     except IndexError:
         return msg
+
+
+def load_json(config_path):
+    try:
+        with open(config_path, 'r') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.decoder.JSONDecodeError):
+        return {}
