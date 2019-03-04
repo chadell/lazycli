@@ -34,8 +34,8 @@ class ConnectThread(Thread):
             'password':             connection_config['password'],
             'global_delay_factor':  self.connection_defaults.get('global_delay_factor', self.GLOBAL_DELAY_FACTOR),
             'timeout':              self.connection_defaults.get('timeout', self.TIMEOUT),
-            'session_log':          self.connection_defaults.get('log_path', self.LOG_PATH) \
-                                    if connection_config['log_enabled'] else None
+            'session_log':          self.connection_defaults.get('log_path', self.LOG_PATH)
+                                    if connection_config['log_enabled'] else None # noqa E131
         }
         self.custom_commands = custom_commands
         self.queue = queue

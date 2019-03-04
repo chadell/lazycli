@@ -39,7 +39,7 @@ CLI shortcuts:
 
         vendor_commands = None
         resp = input("Do you want to add a concrete vendor implementation (y/N)?")
-        if resp.lower()  in ['y', 'yes']:
+        if resp.lower() in ['y', 'yes']:
             vendor_commands = self._ask_vendor_commands()
         if not vendor_commands:
             print(color_string("Keep in mind that no actual implementation added", 'yellow'))
@@ -73,7 +73,6 @@ CLI shortcuts:
         print(color_string(f"Edited command {custom_command}", 'green'))
 
     def delete(self, command):
-
         res = self.custom_commands.pop(command, None)
         if not res:
             print(color_string("Command doesn't exit", 'red'))

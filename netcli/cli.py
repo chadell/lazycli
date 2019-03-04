@@ -34,7 +34,6 @@ def config(ctx):
     """
     Manage your custom commands
     """
-    pass
 
 
 cli.add_command(config)
