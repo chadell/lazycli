@@ -12,8 +12,10 @@ class Config:
 
     CLI_HELP = """
 CLI shortcuts:
-  - Using 'r- ' you can run raw commands
-  - Using ' | ' you can match specific words
+  - Use 'e- ' to add/edit custom commands
+  - Use 'r- ' to run raw commands
+  - Use ' | ' to match specific words
+  - Use '?' to get command info
 """
 
     def __init__(self):

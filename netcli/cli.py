@@ -161,12 +161,16 @@ def connect(ctx, target, user, password, vendor, logging):
             break
         if user_input in ['']:
             continue
-        if user_input in ['help', 'h']:
+        elif user_input in ['help', 'h']:
             ctx.obj['config'].show_brief(cli=True)
             continue
-        if user_input[-1] == '?':
+        elif user_input[-1] == '?':
             ctx.obj['config'].show_details(user_input[:-2])
             continue
+        elif user_input[0:3] == 'e- ':
+            # Edit mode to update commands
+            ctx.obj['config'].edit(user_input[3:])
+            user_input = 'edit_command'
         print()
         cli_queue.put((True, user_input))
         time.sleep(TIMEOUT)

@@ -25,12 +25,8 @@ class ConnectThread(Thread):
 
     def __init__(self, connection_config, custom_commands, queue):
         Thread.__init__(self)
-        try:
-            with open(self.CONFIG_PATH, 'r') as f:
-                self.connection_defaults = json.load(f)
-        except (FileNotFoundError, json.decoder.JSONDecodeError):
-            self.connection_defaults = {}
 
+        self.connection_defaults = self._load_custom_commands()
         self.config = {
             'device_type':          connection_config['device_type'],
             'ip':                   self._get_target(connection_config['target']),
@@ -44,6 +40,14 @@ class ConnectThread(Thread):
         self.custom_commands = custom_commands
         self.queue = queue
         self.connection = None
+
+    @classmethod
+    def _load_custom_commands(cls):
+        try:
+            with open(cls.CONFIG_PATH, 'r') as f:
+                return json.load(f)
+        except (FileNotFoundError, json.decoder.JSONDecodeError):
+            return {}
 
     def _get_target(self, target):
         '''Return target either is an IP or a fqdn, concatenating dns suffix'''
@@ -169,6 +173,9 @@ class ConnectThread(Thread):
             requested_command = self.queue.get()[1]
             if requested_command.lower() in ['end', 'exit', 'quit']:
                 end_loop = True
+            elif requested_command.lower() in ['edit_command']:
+                self.custom_commands = self._load_custom_commands()
+                self.queue.put((True, ""))
             else:
                 try:
                     response = self._execute_command(requested_command)
