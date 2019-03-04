@@ -4,7 +4,9 @@
 
 netcli is the CLI for the people who is not able to remember every command for every vendor gear.
 
-So, the idea it's simple, why you don't build your own language and then use it as you want?
+Networking nowadays is moving away from traditional CLI operation, but there is still some use-cases for debugging that a CLI interaction gives some benefits, but when you spend more time coding than CLIing you end forgetting about specific CLI syntax when you are managing a multi-vendor fleet.
+
+To ovecome this issue, **netcli** let you create your own CLI language.
 
 netcli solves this problem using a simple approach:
 * You have a **config** mode to handle your custom commands and the translation for all the specific vendors you are interested in.

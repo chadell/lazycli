@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 import time
-# pylint: disable=useless-import-alias,unnecessary-pass,unused-argument,too-many-statements,no-value-for-parameter
+# pylint: disable=useless-import-alias,unused-argument,no-value-for-parameter,too-many-arguments
 try:
     import queue as queue
 except ImportError:
@@ -32,7 +32,7 @@ def cli(ctx):
 @click.pass_context
 def config(ctx):
     """
-    Manage your custom CLI command to rule the world
+    Manage your custom commands
     """
     pass
 
@@ -61,17 +61,22 @@ def delete(ctx, command):
 
 
 @config.command()
+@click.argument(
+    'command',
+    required=False,
+    )
 @click.option(
     '--verbose/--no-verbose',
     default=False,
+    help='Provide full detail of custom command.',
 )
 @click.pass_context
-def show(ctx, verbose):
+def show(ctx, command, verbose):
     """
-    List all the available custom commands
+    Show custom command details (if no command, brief show of all commands).
     """
-    if verbose:
-        ctx.obj['config'].show()
+    if verbose or command:
+        ctx.obj['config'].show(command)
     else:
         ctx.obj['config'].show_brief()
         print()
@@ -81,11 +86,11 @@ def show(ctx, verbose):
 @config.command()
 @click.argument('command')
 @click.pass_context
-def update(ctx, command):
+def edit(ctx, command):
     """
-    Update a custom command
+    Edit a custom command
     """
-    pass
+    ctx.obj['config'].edit(command)
 
 
 @cli.command()
