@@ -38,7 +38,8 @@ class ConnectThread(Thread):
             'password':             connection_config['password'],
             'global_delay_factor':  self.connection_defaults.get('global_delay_factor', self.GLOBAL_DELAY_FACTOR),
             'timeout':              self.connection_defaults.get('timeout', self.TIMEOUT),
-            'session_log':          self.connection_defaults.get('log_path', self.LOG_PATH),
+            'session_log':          self.connection_defaults.get('log_path', self.LOG_PATH) \
+                                    if connection_config['log_enabled'] else None
         }
         self.custom_commands = custom_commands
         self.queue = queue
@@ -177,5 +178,7 @@ class ConnectThread(Thread):
                 self.queue.put((success, response))
             time.sleep(TIMEOUT)
 
-        print(color_string(f"Disconnected from {self.config['ip']}. "
-                           f"All your activity has been recorded in {self.config['session_log']}", 'yellow'))
+        bye_message = f"Disconnected from {self.config['ip']}. "
+        if self.config['session_log']:
+            bye_message += f"All your activity has been recorded in {self.config['session_log']}"
+        print(color_string(bye_message, 'yellow'))

@@ -93,17 +93,25 @@ def update(ctx, command):
 @click.option(
     '--user', '-u',
     default=os.getlogin(),
+    help="Specify username to connect, by default the logged user.",
 )
 @click.option(
     '--password', '-p',
     default=None,
+    help="Specify password for user, if not provider SSH keys used.",
 )
 @click.option(
     '--vendor', '-v',
     required=True,
+    help="Define vendor type to pick the right vendor commands.",
+)
+@click.option(
+    '--logging', '--log',
+    is_flag=True,
+    help="Enable CLI session logging.",
 )
 @click.pass_context
-def connect(ctx, target, user, password, vendor):
+def connect(ctx, target, user, password, vendor, logging):
     """
     Connect to a device and run and interactive CLI session
     """
@@ -117,6 +125,7 @@ def connect(ctx, target, user, password, vendor):
                 "user": user,
                 "password": password,
                 "device_type": vendor,
+                "log_enabled": logging,
             }
             connection_thread = ConnectThread(connection_config,
                                               ctx.obj['config'].custom_commands,
