@@ -91,6 +91,12 @@ class ConnectThread(Thread):
         return self._process_arguments(command, vendor_command)
 
     def _process_arguments(self, command, vendor_command):
+        """
+        Processes arguments to replace within [] the () part by the argument value.
+        If argument value is 'None', then all the [] part is omitted
+        Arguments, in the custom command, come all at the end
+            "show bgp [vrf (vrf)] summary"
+        """
         main_command = command.split("[")[0].strip()
         try:
             args_command = "[" + command.split("[")[1]
@@ -103,7 +109,8 @@ class ConnectThread(Thread):
                         arg_value = arg.split(":")[1]
                     except IndexError:
                         arg_value = self.custom_commands[main_command]["args"][arg_key]
-                    vendor_command = vendor_command.replace(f"[{arg_key}]", arg_value)
+                    # At this point we have the arguments provided by the user or defaults
+                    vendor_command = self._get_command_argument(vendor_command, arg_key, arg_value)
                 else:
                     raise NetcliError(f"Unknown argument: {arg_key}")
         except IndexError:
@@ -112,6 +119,22 @@ class ConnectThread(Thread):
                 vendor_command = vendor_command.replace(f"[{arg_key}]", arg_value)
 
         return vendor_command
+
+    @staticmethod
+    def _get_command_argument(vendor_command, arg_key, arg_value):
+        """
+            "show bgp [vrf (vrf)] summary [sadfasd (abc) sdfsd]"
+        """
+        regex_ext = r"\[(.*?)\]"
+        # Only one iteration expected
+        for arg_expression in re.findall(regex_ext, vendor_command):
+            if arg_value == "None":
+                return vendor_command.replace(f"[{arg_expression}]", "").strip(" ")
+            if f"({arg_key})" in arg_expression:
+                vendor_command = vendor_command.replace(f"({arg_key})", arg_value)
+                vendor_command = vendor_command.replace("[", "").replace("]", "")
+                return vendor_command
+        return ""
 
     def _execute_command(self, requested_command):
         # Running raw vendor commands with "r- "

@@ -101,7 +101,7 @@ CLI shortcuts:
                                    'yellow'))
                 if 'args' in self.custom_commands[custom_command]:
                     print(color_string(f'   {" " * len(custom_command)}  '
-                                       '{self.custom_commands[custom_command]["args"]}',
+                                       f'{self.custom_commands[custom_command]["args"]}',
                                        'yellow'))
 
     def _save_to_file(self):
