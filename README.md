@@ -2,11 +2,11 @@
 
 # NETCLI
 
-netcli is the CLI for the people who is not able to remember every command for every vendor gear.
+netcli is the CLI for the people who doesn't want to remember every command from every vendor gear.
 
-Networking nowadays is moving away from traditional CLI operation, but there is still some use-cases for debugging that a CLI interaction gives some benefits, but when you spend more time coding than CLIing you end forgetting about specific CLI syntax when you are managing a multi-vendor fleet.
+Networking nowadays is moving away from traditional CLI operation, but there is still some debugging use-cases when a CLI interaction gives some benefits. However, when you spend more time coding than CLIing, you end up forgetting about specific CLI syntax, still necessary when you are managing a multi-vendor fleet.
 
-To ovecome this issue, **netcli** let you create your own CLI language.
+To ovecome this issue, **netcli** lets you create your own CLI language, for interact with any device using your own custom commands.
 
 netcli solves this problem using a simple approach:
 * You have a **config** mode to handle your custom commands and the translation for all the specific vendors you are interested in.
@@ -36,8 +36,12 @@ Note:
 
 This will enter an interactive mode to provide:
 * Description: Useful to remember what this command is doing
-* Vendor specific implementations, using this format: `<vendor_type> - <your command>`
-    * **important** within `<your_command>` you can place the arguments provided using `[arg_name]`
+* Vendor specific implementations, using this format: `<vendor_type> - <vendor_command>`
+    * **important** within `<vendorcommand>` you can place the arguments provided using `[arg_name]`
+    * Example: `show bgp summary [instance (vrf)]`
+        * Every argument is between square brackets `[]`
+        * Within the brackets, the parenthesis `()` is the keyword that will be replaced
+        * If an argument keyword has the string value "None", the argument (and related text) will be omitted
     * `<vendor_type>` comes from [Netmiko library](https://github.com/ktbyers/netmiko/blob/develop/netmiko/ssh_dispatcher.py#L76)
 
 ### Delete
