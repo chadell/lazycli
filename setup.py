@@ -35,8 +35,8 @@ class PyTest(TestCommand):
         sys.exit(errno)
 
 
-with open(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'README.md'), encoding='utf-8') as f:
-    long_description = f.read()
+with open(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'README.md'), encoding='utf-8') as readme_file:
+    long_description = readme_file.read()
 
 
 setup(
