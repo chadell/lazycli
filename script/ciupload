@@ -15,8 +15,8 @@ chmod 600 ~/.pypirc
 cat >> ~/.pypirc <<EOF
 [distutils]
 index-servers =
-    repository
-[repository]
+    pypi
+[pypi]
 username: ${REPOSITORY_USER}
 password: ${REPOSITORY_PWD}
 EOF
@@ -24,4 +24,4 @@ EOF
 # python setup.py sdist upload -r repository
 python setup.py sdist bdist_wheel
 pip install twine
-twine upload -r repository dist dist/*
+twine upload --repository pypi dist/*
