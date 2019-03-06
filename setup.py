@@ -35,6 +35,10 @@ class PyTest(TestCommand):
         sys.exit(errno)
 
 
+with open(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
+
+
 setup(
     name=package.__name__,
     version=package.__version__,
@@ -42,6 +46,8 @@ setup(
     author=package.__author__,
     author_email=package.__author_email__,
     description=package.__description__,
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     packages=find_packages(),
     entry_points={
         'console_scripts': [
