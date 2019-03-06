@@ -37,7 +37,7 @@ class ConnectThread(Thread):
             'session_log':          self.connection_defaults.get('log_path', self.LOG_PATH)
                                     if connection_config['log_enabled'] else None # noqa E131
         }
-        self.custom_commands = Config().__dict__
+        self.custom_commands = Config().__dict__['custom_commands']
         self.queue = queue
         self.connection = None
 
@@ -75,7 +75,6 @@ class ConnectThread(Thread):
 
     def _get_vendor_command(self, command):
         main_command = command.split("[")[0].strip()
-
         if main_command not in self.custom_commands:
             recommended_commands = self._recommend_command(main_command)
             response = f"Custom command {command} not recognized."
@@ -98,26 +97,36 @@ class ConnectThread(Thread):
             "show bgp [vrf (vrf)] summary"
         """
         main_command = command.split("[")[0].strip()
+        # In the command could be several arguments, none or all
         try:
             args_command = "[" + command.split("[")[1]
-            regex = r"\[(.*?)\]"
-            for arg in re.findall(regex, args_command):
-                arg = arg.replace("[", "").replace("]", "")
-                arg_key = arg.split(":")[0]
-                if arg_key in self.custom_commands[main_command]["args"]:
-                    try:
-                        arg_value = arg.split(":")[1]
-                    except IndexError:
-                        arg_value = self.custom_commands[main_command]["args"][arg_key]
-                    # At this point we have the arguments provided by the user or defaults
-                    vendor_command = self._get_command_argument(vendor_command, arg_key, arg_value)
-                else:
-                    raise NetcliError(f"Unknown argument: {arg_key}")
         except IndexError:
-            for arg_key in self.custom_commands[main_command]["args"]:
-                arg_value = self.custom_commands[main_command]["args"][arg_key]
-                vendor_command = vendor_command.replace(f"[{arg_key}]", arg_value)
+            args_command = ""
+        regex = r"\[(.*?)\]"
+        user_args = re.findall(regex, args_command)
+        for arg in self.custom_commands[main_command]["args"]:
 
+            full_arg = None
+            for user_arg in user_args:
+                if arg in user_arg:
+                    full_arg = user_arg
+
+            if full_arg:
+                user_args.remove(full_arg)
+                arg = full_arg.replace("[", "").replace("]", "")
+                arg_key = arg.split(":")[0]
+                try:
+                    arg_value = arg.split(":")[1]
+                except IndexError:
+                    arg_value = self.custom_commands[main_command]["args"][arg_key]
+            else:
+                arg_key = arg
+                arg_value = self.custom_commands[main_command]["args"][arg_key]
+
+            # At this point we have the arguments provided by the user or defaults
+            vendor_command = self._get_command_argument(vendor_command, arg_key, arg_value)
+        if user_args:
+            raise NetcliError(f"Unknown arguments: {user_args}")
         return vendor_command
 
     @staticmethod
@@ -189,7 +198,7 @@ class ConnectThread(Thread):
             if requested_command.lower() in ['end', 'exit', 'quit']:
                 end_loop = True
             elif requested_command.lower() in ['edit_command']:
-                self.custom_commands = Config().__dict__
+                self.custom_commands = Config().__dict__['custom_commands']
                 self.queue.put((True, ""))
             else:
                 try:
